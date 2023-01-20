@@ -11,8 +11,16 @@ const camsEnquirySchema = {
     phoneNumber : {type: String, required: true}
 }
 
+const registrationSchema = {
+    firstName: String,
+    lastName: String,
+    email: String,
+    user: String,
+    password: String
+}
 
 module.exports = {
     testimonialSchema,
-    camsEnquirySchema
+    camsEnquirySchema,
+    registrationSchema
 }
