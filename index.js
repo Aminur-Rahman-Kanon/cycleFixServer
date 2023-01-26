@@ -20,11 +20,13 @@ const testimonialSchema = require('./schema/schema').testimonialSchema;
 const camsEnquirySchema = require('./schema/schema').camsEnquirySchema;
 const registrationSchema = require('./schema/schema').registrationSchema;
 const contactQuerySchema = require('./schema/schema').contactQuerySchema;
+const bookingSchema = require('./schema/schema').bookingSchema;
 
 const testimonialModel = mongoose.model('testimonial', testimonialSchema);
 const camsEnquiryModel = mongoose.model('cams-enquiry', camsEnquirySchema);
 const registrationModel = mongoose.model('registered-user', registrationSchema);
 const contactQueryModel = mongoose.model('contact-query', contactQuerySchema);
+const bookingModel = mongoose.model('Customer-Booking', bookingSchema);
 
 
 app.post('/testimonial', (req, res) => {
@@ -86,7 +88,7 @@ app.post('/contact-query', async (req, res) => {
 app.post('/payment', async (req, res) => {
     const {amount, id} = req.body;
 
-    console.log(amount, id);
+    console.log(amount, id); 
     try {
         const payment = await stripe.paymentIntents.create({
             amount,
@@ -96,7 +98,6 @@ app.post('/payment', async (req, res) => {
             confirm: true
         })
 
-        console.log(payment);
         res.json({
             message: 'Payment Successful',
             success: true
@@ -104,10 +105,25 @@ app.post('/payment', async (req, res) => {
     } catch (error) {
         console.log(error);
         res.json({
-            message: 'pPayment Failed',
+            message: 'Payment Failed',
             success: false
         })
     }
+})
+
+app.post('/payment-success', async (req, res) => {
+    const { userData } = req.body;
+
+    console.log(userData);
+
+    const totalPrice = await userData.totalPrice / 100;
+
+    userData.totalPrice = totalPrice;
+
+    await bookingModel.create({
+        ...userData
+    }).then(response => res.json({ status: 'success' })).catch(err => res.json({ status: 'error' }))
+    
 })
 
 if (process.env.NODE_ENV === 'production') {

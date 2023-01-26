@@ -26,9 +26,26 @@ const contactQuerySchema = {
     message: String
 }
 
+const bookingSchema = {
+    service: String,
+    date: String,
+    time: String,
+    packagePrice: String,
+    totalPrice: String,
+    paymentStatus: String,
+    authCode: String,
+    firstName: String,
+    lastName: String,
+    email: String,
+    phone: String,
+    bikeDetails: Object
+
+}
+
 module.exports = {
     testimonialSchema,
     camsEnquirySchema,
     registrationSchema,
-    contactQuerySchema
+    contactQuerySchema,
+    bookingSchema
 }
