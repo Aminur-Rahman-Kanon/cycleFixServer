@@ -8,6 +8,7 @@ require('dotenv').config();
 const path = require('path');
 const bcrypt = require('bcrypt');
 const salt = bcrypt.genSaltSync(10);
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 //mongoDB initialization
 mongoose.connect(process.env.MONGO_URI, {
@@ -18,10 +19,12 @@ mongoose.connect(process.env.MONGO_URI, {
 const testimonialSchema = require('./schema/schema').testimonialSchema;
 const camsEnquirySchema = require('./schema/schema').camsEnquirySchema;
 const registrationSchema = require('./schema/schema').registrationSchema;
+const contactQuerySchema = require('./schema/schema').contactQuerySchema;
 
 const testimonialModel = mongoose.model('testimonial', testimonialSchema);
 const camsEnquiryModel = mongoose.model('cams-enquiry', camsEnquirySchema);
 const registrationModel = mongoose.model('registered-user', registrationSchema);
+const contactQueryModel = mongoose.model('contact-query', contactQuerySchema);
 
 
 app.post('/testimonial', (req, res) => {
@@ -69,6 +72,41 @@ app.post('/login', async (req, res) => {
     }
     else {
         return res.json({ status: 'user not found' })
+    }
+})
+
+app.post('/contact-query', async (req, res) => {
+    const { name, phone, email, message } = req.body;
+
+    await contactQueryModel.create({
+        name, phone, email, message
+    }).then(response => res.json({ status: 'success' })).catch(err => res.json({ status: 'error' }))
+})
+
+app.post('/payment', async (req, res) => {
+    const {amount, id} = req.body;
+
+    console.log(amount, id);
+    try {
+        const payment = await stripe.paymentIntents.create({
+            amount,
+            currency: "GBP",
+            description: 'test',
+            payment_method: id,
+            confirm: true
+        })
+
+        console.log(payment);
+        res.json({
+            message: 'Payment Successful',
+            success: true
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: 'pPayment Failed',
+            success: false
+        })
     }
 })
 

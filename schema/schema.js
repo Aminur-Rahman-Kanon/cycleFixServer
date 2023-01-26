@@ -19,8 +19,16 @@ const registrationSchema = {
     password: String
 }
 
+const contactQuerySchema = {
+    name: String,
+    phone: String,
+    email: String,
+    message: String
+}
+
 module.exports = {
     testimonialSchema,
     camsEnquirySchema,
-    registrationSchema
+    registrationSchema,
+    contactQuerySchema
 }
