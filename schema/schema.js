@@ -29,7 +29,6 @@ const contactQuerySchema = {
 const bookingSchema = {
     service: String,
     date: String,
-    time: String,
     packagePrice: String,
     totalPrice: String,
     paymentStatus: String,

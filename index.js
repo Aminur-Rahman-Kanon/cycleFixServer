@@ -114,8 +114,6 @@ app.post('/payment', async (req, res) => {
 app.post('/payment-success', async (req, res) => {
     const { userData } = req.body;
 
-    console.log(userData);
-
     const totalPrice = await userData.totalPrice / 100;
 
     userData.totalPrice = totalPrice;
@@ -133,6 +131,31 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
     })
 }
+
+app.post('/query-available-date', async (req, res) => {
+    const queryForDates = await bookingModel.find({}, {date: 1, _id: 0}).then(response => {
+        const allMonth = [];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        response.forEach(dates => {
+            months.map(month => {
+                if (dates.date.includes(month)) {
+                    if (allMonth[months.indexOf(month)] === undefined){
+                        // console.log('yes');
+                        allMonth[months.indexOf(month)] = [];
+                        allMonth[months.indexOf(month)].push(parseInt(dates.date.split(' ')[2]))
+                    }
+                    else {
+                        allMonth[months.indexOf(month)].push(parseInt(dates.date.split(' ')[2]))
+                    }
+                }
+            })
+        })
+        res.json({ status: 'success', data: allMonth })
+    }).catch(err => res.json({ status: 'failed' }));
+    
+})
+
+
 
 const port = process.env.PORT
 
