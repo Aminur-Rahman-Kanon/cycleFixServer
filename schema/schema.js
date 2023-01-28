@@ -41,10 +41,16 @@ const bookingSchema = {
 
 }
 
+const xiaomiQuery = {
+    service: String,
+    price: String
+}
+
 module.exports = {
     testimonialSchema,
     camsEnquirySchema,
     registrationSchema,
     contactQuerySchema,
-    bookingSchema
+    bookingSchema,
+    xiaomiQuery
 }

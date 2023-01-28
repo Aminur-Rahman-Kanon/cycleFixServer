@@ -21,12 +21,14 @@ const camsEnquirySchema = require('./schema/schema').camsEnquirySchema;
 const registrationSchema = require('./schema/schema').registrationSchema;
 const contactQuerySchema = require('./schema/schema').contactQuerySchema;
 const bookingSchema = require('./schema/schema').bookingSchema;
+const xiaomiQuery = require('./schema/schema').xiaomiQuery;
 
 const testimonialModel = mongoose.model('testimonial', testimonialSchema);
 const camsEnquiryModel = mongoose.model('cams-enquiry', camsEnquirySchema);
 const registrationModel = mongoose.model('registered-user', registrationSchema);
 const contactQueryModel = mongoose.model('contact-query', contactQuerySchema);
 const bookingModel = mongoose.model('Customer-Booking', bookingSchema);
+const xiaomiModel = mongoose.model('xiaomi-query', xiaomiQuery);
 
 
 app.post('/testimonial', (req, res) => {
@@ -153,6 +155,18 @@ app.post('/query-available-date', async (req, res) => {
         res.json({ status: 'success', data: allMonth })
     }).catch(err => res.json({ status: 'failed' }));
     
+})
+
+app.post('/book-xiaomi-service', async (req, res) => {
+    const { service, price } = req.body;
+
+    try {
+        await xiaomiModel.create({
+            service, price
+        }).then(response => res.json({ status: 'success' })).catch(err => res.json({ status: 'error' }))
+    } catch (error) {
+        res.json({ status: 'error' })
+    }
 })
 
 
