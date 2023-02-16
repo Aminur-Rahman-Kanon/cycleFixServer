@@ -90,7 +90,6 @@ app.post('/contact-query', async (req, res) => {
 app.post('/payment', async (req, res) => {
     const {amount, id} = req.body;
 
-    console.log(amount, id); 
     try {
         const payment = await stripe.paymentIntents.create({
             amount,
@@ -115,6 +114,8 @@ app.post('/payment', async (req, res) => {
 
 app.post('/payment-success', async (req, res) => {
     const { userData } = req.body;
+
+    console.log(userData)
 
     const totalPrice = await userData.totalPrice / 100;
 
@@ -158,11 +159,11 @@ app.post('/query-available-date', async (req, res) => {
 })
 
 app.post('/book-xiaomi-service', async (req, res) => {
-    const { service, price } = req.body;
+    const { service, price, date, name, email, phone } = req.body;
 
     try {
         await xiaomiModel.create({
-            service, price
+            service, price, date, name, email, phone
         }).then(response => res.json({ status: 'success' })).catch(err => res.json({ status: 'error' }))
     } catch (error) {
         res.json({ status: 'error' })

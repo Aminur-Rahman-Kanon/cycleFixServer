@@ -30,7 +30,9 @@ const bookingSchema = {
     service: String,
     date: String,
     packagePrice: String,
-    totalPrice: String,
+    totalPrice: Number,
+    due: Number,
+    deposit: Number,
     paymentStatus: String,
     authCode: String,
     firstName: String,
@@ -38,12 +40,15 @@ const bookingSchema = {
     email: String,
     phone: String,
     bikeDetails: Object
-
 }
 
 const xiaomiQuery = {
     service: String,
-    price: String
+    price: String,
+    date: String,
+    name: String,
+    email: String,
+    phone: String,
 }
 
 module.exports = {
