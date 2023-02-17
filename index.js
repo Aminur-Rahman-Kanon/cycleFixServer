@@ -38,6 +38,15 @@ app.post('/testimonial', (req, res) => {
     })
 })
 
+app.post('/submit-feedback', (req, res) => {
+    const {name, email, comment, rating} = req.body;
+
+    testimonialModel.create({
+        name, email, comment, rating
+    }).then(response => res.json({ status: 'success' })).catch(err => res.json({ status: 'error' }))
+    
+})
+
 app.post('/submit-query', async (req, res) => {
     const { name, email, message, phoneNumber } = req.body;
 
