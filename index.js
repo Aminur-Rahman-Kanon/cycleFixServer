@@ -9,6 +9,11 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const salt = bcrypt.genSaltSync(10);
 const stripe = require('stripe')(process.env.STRIPE_KEY);
+const jwt = require('jsonwebtoken');
+app.set('views', './public/views');
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: false }));
+const nodeMailer = require('nodemailer');
 
 //mongoDB initialization
 mongoose.connect(process.env.MONGO_URI, {
@@ -88,6 +93,96 @@ app.post('/login', async (req, res) => {
     }
 })
 
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    const userCheck = await registrationModel.findOne({ email });
+    if (!userCheck) return res.json({ status: 'user not found' })
+
+    const token = jwt.sign({ id: userCheck._id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN
+    });
+
+    const link = `https://cyclefixserver.onrender.com/reset-password/${userCheck._id}/${token}`;
+
+    try {
+        const transporter = nodeMailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'cyclefixservice@gmail.com',
+              pass: 'kvqsfyoliecygdaj'
+            }
+        });
+        
+        const mailOptions = {
+        from: 'youremail@gmail.com',
+        to: email,
+        subject: 'Reseting the password',
+        text: `Here is the link to reset your password. Please note that this link is valid for 5 minutes. After 5 minutes it will not work, then you have to try again. Also Please dont forget to check your spam folder
+        \n${link}`
+        };
+        
+        transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+        });
+
+        return res.json({ status: 'success' })
+        
+    } catch (error) {
+        return res.json({ status: 'failed' })
+    }
+
+
+    
+})
+
+app.get('/reset-password/:id/:token', async (req, res) => {
+    const { id, token } = req.params;
+    
+    const userCheck = await registrationModel.findOne({ _id: id });
+    if (!userCheck) return res.json({ status: 'not found' });
+
+    try {
+        const verify = jwt.verify(token, process.env.JWT_SECRET);
+        res.render('index', {email: userCheck.email})
+    } catch (error) {
+        res.send("Link expired. Please try again")
+    }
+})
+
+app.post('/reset-password/:id/:token', async (req, res) => {
+    const { id, token } = req.params;
+
+    const {password, confirmPassword} = req.body;
+    
+    const userCheck = await registrationModel.findOne({ _id: id });
+
+    if (!userCheck) return res.json({ status: 'not found' });
+
+    try {
+        const verify = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(verify);
+        const encryptedPassword = await bcrypt.hash(password, salt);
+        await registrationModel.updateOne({
+            _id: id
+        },
+        {
+            $set: {
+                password: encryptedPassword
+            }
+        })
+        res.render("success");
+        
+    } catch (error) {
+        res.json({ status: 'something went wrong' })
+    }
+})
+
+
 app.post('/contact-query', async (req, res) => {
     const { name, phone, email, message } = req.body;
 
@@ -136,23 +231,26 @@ app.post('/payment-success', async (req, res) => {
     
 })
 
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('client/build'))
+app.use(express.static(path.join(__dirname, 'public')))
 
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
-    })
-}
+// console.log(__dirname+'/public');
+
+// if (process.env.NODE_ENV === 'production') {
+//     app.use(express.static('/'))
+
+//     app.get('*', (req, res) => {
+//         res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+//     })
+// }
 
 app.post('/query-available-date', async (req, res) => {
-    const queryForDates = await bookingModel.find({}, {date: 1, _id: 0}).then(response => {
+    await bookingModel.find({}, {date: 1, _id: 0}).then(response => {
         const allMonth = [];
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         response.forEach(dates => {
             months.map(month => {
                 if (dates.date.includes(month)) {
                     if (allMonth[months.indexOf(month)] === undefined){
-                        // console.log('yes');
                         allMonth[months.indexOf(month)] = [];
                         allMonth[months.indexOf(month)].push(parseInt(dates.date.split(' ')[2]))
                     }
