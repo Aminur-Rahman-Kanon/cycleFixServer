@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const testimonialSchema = {
     comment: {type: String, required: true},
     name: {type: String, required: true},
@@ -52,11 +54,18 @@ const xiaomiQuery = {
     phone: String,
 }
 
+const testimonialModel = mongoose.model('testimonial', testimonialSchema);
+const camsEnquiryModel = mongoose.model('cams-enquiry', camsEnquirySchema);
+const registrationModel = mongoose.model('registered-user', registrationSchema);
+const contactQueryModel = mongoose.model('contact-query', contactQuerySchema);
+const bookingModel = mongoose.model('Customer-Booking', bookingSchema);
+const xiaomiModel = mongoose.model('xiaomi-query', xiaomiQuery);
+
 module.exports = {
-    testimonialSchema,
-    camsEnquirySchema,
-    registrationSchema,
-    contactQuerySchema,
-    bookingSchema,
-    xiaomiQuery
+    testimonialModel,
+    camsEnquiryModel,
+    registrationModel,
+    contactQueryModel,
+    bookingModel,
+    xiaomiModel
 }
